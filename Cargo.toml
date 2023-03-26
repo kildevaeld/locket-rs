@@ -1,0 +1,25 @@
+[package]
+edition = "2021"
+name = "locking"
+version = "0.1.0"
+
+
+[features]
+default = []
+async = []
+parking_lot = ["dep:parking_lot", "std"]
+spin = ["dep:spin"]
+std = []
+std-lock = ["std"]
+
+async-lock = ["dep:async-lock", "dep:pin-project-lite", "async"]
+
+[dependencies]
+async-lock = { version = "2", optional = true }
+parking_lot = { version = "0.12", optional = true }
+spin = { version = "0.9", default-features = false, features = [
+    "mutex",
+    "spin_mutex",
+    "rwlock",
+], optional = true }
+pin-project-lite = { version = "0.2", optional = true }
