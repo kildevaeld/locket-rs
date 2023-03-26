@@ -308,18 +308,3 @@ mod std_impl {
         }
     }
 }
-
-// fn test() {
-//     let lock = Arc::new(Mutex::new(2020));
-
-//     let read = lock.read().expect("read lock");
-
-//     println!("{}", read);
-
-//     let clone = lock.clone();
-
-//     std::thread::spawn(move || {
-//         let mut lock = clone.write().expect("msg");
-//         *lock = 2020;
-//     });
-// }
