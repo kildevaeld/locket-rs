@@ -41,15 +41,17 @@ impl<T> Upgrade for RcWeak<T> {
     }
 }
 
-pub trait Lockable<'a> {
-    type Guard: 'a;
-    fn lock(&self) -> Self::Guard;
+pub trait Lockable {
+    type Guard<'a>
+    where
+        Self: 'a;
+    fn lock(&self) -> Self::Guard<'_>;
 }
 
 #[cfg(feature = "std")]
-impl<'a> Lockable<'a> for std::io::Stdout {
-    type Guard = std::io::StdoutLock<'a>;
-    fn lock(&self) -> Self::Guard {
+impl Lockable for std::io::Stdout {
+    type Guard<'a> = std::io::StdoutLock<'a>;
+    fn lock(&self) -> Self::Guard<'_> {
         self.lock()
     }
 }

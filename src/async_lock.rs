@@ -13,7 +13,7 @@ where
 {
     type ReadGuard<'a> = L::ReadGuard<'a>;
 
-    type ReadWriteGuard<'a> = L::ReadWriteGuard<'a>;
+    type WriteGuard<'a> = L::WriteGuard<'a>;
 
     type ReadFuture<'a> = L::ReadFuture<'a>;
     type WriteFuture<'a> = L::WriteFuture<'a>;
@@ -38,7 +38,7 @@ where
 {
     type ReadGuard<'a> = L::ReadGuard<'a>;
 
-    type ReadWriteGuard<'a> = L::ReadWriteGuard<'a>;
+    type WriteGuard<'a> = L::WriteGuard<'a>;
 
     type ReadFuture<'a> = L::ReadFuture<'a>;
     type WriteFuture<'a> = L::WriteFuture<'a>;

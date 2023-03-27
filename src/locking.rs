@@ -8,7 +8,7 @@ pub trait LockApiReadGuard<'a, T> {
     fn get(&self) -> &T;
 }
 
-pub trait LockApiReadWriteGuard<'a, T>: LockApiReadGuard<'a, T> {
+pub trait LockApiWriteGuard<'a, T>: LockApiReadGuard<'a, T> {
     fn get_mut(&mut self) -> &mut T;
 }
 
@@ -16,13 +16,13 @@ pub trait LockApi<T> {
     type ReadGuard<'a>: LockApiReadGuard<'a, T>
     where
         Self: 'a;
-    type ReadWriteGuard<'a>: LockApiReadWriteGuard<'a, T>
+    type WriteGuard<'a>: LockApiWriteGuard<'a, T>
     where
         Self: 'a;
 
     fn read(&self) -> Result<Self::ReadGuard<'_>>;
 
-    fn write(&self) -> Result<Self::ReadWriteGuard<'_>>;
+    fn write(&self) -> Result<Self::WriteGuard<'_>>;
 
     fn new(inner: T) -> Self;
 }
@@ -39,7 +39,7 @@ impl<'a, T> LockApiReadGuard<'a, T> for RefMut<'a, T> {
     }
 }
 
-impl<'a, T> LockApiReadWriteGuard<'a, T> for RefMut<'a, T> {
+impl<'a, T> LockApiWriteGuard<'a, T> for RefMut<'a, T> {
     fn get_mut(&mut self) -> &mut T {
         self.deref_mut()
     }
@@ -51,13 +51,13 @@ where
 {
     type ReadGuard<'a> = Ref<'a, T>;
 
-    type ReadWriteGuard<'a> = RefMut<'a, T>;
+    type WriteGuard<'a> = RefMut<'a, T>;
 
     fn read(&self) -> Result<Self::ReadGuard<'_>> {
         self.try_borrow().map_err(|_| LockError)
     }
 
-    fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+    fn write(&self) -> Result<Self::WriteGuard<'_>> {
         self.try_borrow_mut().map_err(|_| LockError)
     }
 
@@ -78,7 +78,7 @@ mod parking_lot_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for MutexGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for MutexGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -90,13 +90,13 @@ mod parking_lot_impl {
     {
         type ReadGuard<'a> = MutexGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = MutexGuard<'a, T>;
+        type WriteGuard<'a> = MutexGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             Ok(self.lock())
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             Ok(self.lock())
         }
 
@@ -119,7 +119,7 @@ mod parking_lot_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -131,13 +131,13 @@ mod parking_lot_impl {
     {
         type ReadGuard<'a> = RwLockReadGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = RwLockWriteGuard<'a, T>;
+        type WriteGuard<'a> = RwLockWriteGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             Ok((*self).read())
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             Ok((*self).write())
         }
 
@@ -159,7 +159,7 @@ mod spin_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for MutexGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for MutexGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -171,13 +171,13 @@ mod spin_impl {
     {
         type ReadGuard<'a> = MutexGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = MutexGuard<'a, T>;
+        type WriteGuard<'a> = MutexGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             Ok(self.lock())
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             Ok(self.lock())
         }
 
@@ -200,7 +200,7 @@ mod spin_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -212,13 +212,13 @@ mod spin_impl {
     {
         type ReadGuard<'a> = RwLockReadGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = RwLockWriteGuard<'a, T>;
+        type WriteGuard<'a> = RwLockWriteGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             Ok((*self).read())
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             Ok((*self).write())
         }
 
@@ -240,7 +240,7 @@ mod std_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for MutexGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for MutexGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -252,13 +252,13 @@ mod std_impl {
     {
         type ReadGuard<'a> = MutexGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = MutexGuard<'a, T>;
+        type WriteGuard<'a> = MutexGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             self.lock().map_err(|_| LockError)
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             self.lock().map_err(|_| LockError)
         }
 
@@ -281,7 +281,7 @@ mod std_impl {
         }
     }
 
-    impl<'a, T> LockApiReadWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
+    impl<'a, T> LockApiWriteGuard<'a, T> for RwLockWriteGuard<'a, T> {
         fn get_mut(&mut self) -> &mut T {
             self.deref_mut()
         }
@@ -293,13 +293,13 @@ mod std_impl {
     {
         type ReadGuard<'a> = RwLockReadGuard<'a, T>;
 
-        type ReadWriteGuard<'a> = RwLockWriteGuard<'a, T>;
+        type WriteGuard<'a> = RwLockWriteGuard<'a, T>;
 
         fn read(&self) -> Result<Self::ReadGuard<'_>> {
             (*self).read().map_err(|_| LockError)
         }
 
-        fn write(&self) -> Result<Self::ReadWriteGuard<'_>> {
+        fn write(&self) -> Result<Self::WriteGuard<'_>> {
             (*self).write().map_err(|_| LockError)
         }
 

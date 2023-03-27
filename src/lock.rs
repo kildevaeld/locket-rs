@@ -1,4 +1,4 @@
-use alloc::sync::Arc;
+use alloc::{rc::Rc, sync::Arc};
 
 use crate::{Downgrade, LockApi};
 
@@ -13,17 +13,39 @@ where
 {
     type ReadGuard<'a> = L::ReadGuard<'a>;
 
-    type ReadWriteGuard<'a> = L::ReadWriteGuard<'a>;
+    type WriteGuard<'a> = L::WriteGuard<'a>;
 
     fn read(&self) -> crate::error::Result<Self::ReadGuard<'_>> {
         (**self).read()
     }
 
-    fn write(&self) -> crate::error::Result<Self::ReadWriteGuard<'_>> {
+    fn write(&self) -> crate::error::Result<Self::WriteGuard<'_>> {
         (**self).write()
     }
 
     fn new(inner: T) -> Self {
         Arc::new(L::new(inner))
+    }
+}
+
+impl<L, T> LockApi<T> for Rc<L>
+where
+    L: LockApi<T>,
+    for<'a> L: 'a,
+{
+    type ReadGuard<'a> = L::ReadGuard<'a>;
+
+    type WriteGuard<'a> = L::WriteGuard<'a>;
+
+    fn read(&self) -> crate::error::Result<Self::ReadGuard<'_>> {
+        (**self).read()
+    }
+
+    fn write(&self) -> crate::error::Result<Self::WriteGuard<'_>> {
+        (**self).write()
+    }
+
+    fn new(inner: T) -> Self {
+        Rc::new(L::new(inner))
     }
 }
