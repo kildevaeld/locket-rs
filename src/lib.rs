@@ -18,3 +18,9 @@ pub use self::{error::*, lock::Locket, locking::*, types::*};
 pub use self::async_lock::*;
 #[cfg(feature = "async")]
 pub use async_locking::*;
+
+#[cfg(feature = "parking_lot")]
+pub use parking_lot;
+
+#[cfg(feature = "spin")]
+pub use spin;
