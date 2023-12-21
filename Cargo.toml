@@ -20,11 +20,10 @@ async-std = ["dep:async-std", "async"]
 parking_lot = { version = "0.12", optional = true }
 spin = { version = "0.9", default-features = false, features = [
     "mutex",
-    "spin_mutex",
     "rwlock",
 ], optional = true }
 
-async-lock = { version = "2", optional = true }
+async-lock = { version = "3", optional = true }
 pin-project-lite = { version = "0.2", optional = true }
 tokio = { version = "1", features = ["sync"], optional = true }
 async-std = { version = "1", optional = true }
