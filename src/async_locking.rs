@@ -184,6 +184,9 @@ mod async_lock_impl {
     }
 }
 
+#[cfg(feature = "async-lock")]
+pub use async_lock_impl::FutureResult;
+
 #[cfg(feature = "tokio")]
 mod tokio_impl {
     use super::AsyncLockApi;
